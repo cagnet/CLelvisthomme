@@ -1,0 +1,43 @@
+@host = http://localhost:5000
+
+### Créer un client actif
+POST {{host}}/customers
+Content-Type: application/json
+
+{ "name": "Alice", "isActive": true }
+
+### Créer sa commande
+POST {{host}}/customers/1/orders
+Content-Type: application/json
+
+{ "amount": 125.50 }
+
+### Lire tous les clients
+GET {{host}}/customers
+
+### Lire les commandes du client
+GET {{host}}/customers/1/orders
+
+### Modifier partiellement une commande
+PATCH {{host}}/orders/1
+Content-Type: application/json
+
+{ "amount": 140.00 }
+
+### Désactiver le client
+PATCH {{host}}/customers/1
+Content-Type: application/json
+
+{ "isActive": false }
+
+### Doit répondre 409 inactive_customer
+POST {{host}}/customers/1/orders
+Content-Type: application/json
+
+{ "amount": 25.00 }
+
+### Supprimer la commande puis le client
+DELETE {{host}}/orders/1
+
+###
+DELETE {{host}}/customers/1
