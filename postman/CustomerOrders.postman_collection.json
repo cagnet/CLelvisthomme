@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "CustomerOrders API",
+    "_postman_id": "c7b9a2f0-0000-4000-8000-000000000001",
+    "description": "End-to-end demo collection for the CustomerOrders API: customer CRUD, order CRUD, and the two core business rules (inactive_customer, customer_has_orders). Fully replayable — each run creates its own customer/order and cleans up after itself.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5156" },
+    { "key": "customerId", "value": "" },
+    { "key": "secondCustomerId", "value": "" },
+    { "key": "orderId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Create active customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('Customer has an id', () => pm.expect(body.id).to.be.a('number'));",
+              "pm.test('isActive is true', () => pm.expect(body.isActive).to.eql(true));",
+              "pm.collectionVariables.set('customerId', body.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Client Demo\",\n  \"firstName\": \"Prenom Demo\",\n  \"email\": \"client.demo@example.com\",\n  \"address\": \"Adresse Demo\",\n  \"isActive\": true\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/customers", "host": ["{{baseUrl}}"], "path": ["customers"] }
+      }
+    },
+    {
+      "name": "02 - Get customer by id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Returned id matches', () => pm.expect(body.id).to.eql(pm.collectionVariables.get('customerId')));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/customers/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["customers", "{{customerId}}"] }
+      }
+    },
+    {
+      "name": "03 - List all customers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Response is an array', () => pm.expect(body).to.be.an('array'));",
+              "pm.test('Created customer is in the list', () => {",
+              "  const ids = body.map((c) => c.id);",
+              "  pm.expect(ids).to.include(pm.collectionVariables.get('customerId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/customers", "host": ["{{baseUrl}}"], "path": ["customers"] }
+      }
+    },
+    {
+      "name": "04 - Update customer (partial)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Email was updated', () => pm.expect(body.email).to.eql('client.demo.updated@example.com'));",
+              "pm.test('Name is unchanged', () => pm.expect(body.name).to.eql('Client Demo'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"client.demo.updated@example.com\"\n}" },
+        "url": { "raw": "{{baseUrl}}/customers/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["customers", "{{customerId}}"] }
+      }
+    },
+    {
+      "name": "05 - Create order for customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test('Order is linked to the customer', () => pm.expect(body.customerId).to.eql(pm.collectionVariables.get('customerId')));",
+              "pm.collectionVariables.set('orderId', body.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"amount\": 199.99\n}" },
+        "url": {
+          "raw": "{{baseUrl}}/customers/{{customerId}}/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["customers", "{{customerId}}", "orders"]
+        }
+      }
+    },
+    {
+      "name": "06 - Reject order with amount <= 0 (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"amount\": 0\n}" },
+        "url": {
+          "raw": "{{baseUrl}}/customers/{{customerId}}/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["customers", "{{customerId}}", "orders"]
+        }
+      }
+    },
+    {
+      "name": "07 - List orders for customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Order is present', () => {",
+              "  const ids = body.map((o) => o.id);",
+              "  pm.expect(ids).to.include(pm.collectionVariables.get('orderId'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/customers/{{customerId}}/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["customers", "{{customerId}}", "orders"]
+        }
+      }
+    },
+    {
+      "name": "08 - Update order amount",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Amount was updated', () => pm.expect(body.amount).to.eql(249.99));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"amount\": 249.99\n}" },
+        "url": { "raw": "{{baseUrl}}/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["orders", "{{orderId}}"] }
+      }
+    },
+    {
+      "name": "09 - Deactivate customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Customer is now inactive', () => pm.expect(body.isActive).to.eql(false));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"isActive\": false\n}" },
+        "url": { "raw": "{{baseUrl}}/customers/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["customers", "{{customerId}}"] }
+      }
+    },
+    {
+      "name": "10 - Reject order for inactive customer (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 409 Conflict', () => pm.response.to.have.status(409));",
+              "const body = pm.response.json();",
+              "pm.test('Error code is inactive_customer', () => pm.expect(body.code).to.eql('inactive_customer'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"amount\": 50\n}" },
+        "url": {
+          "raw": "{{baseUrl}}/customers/{{customerId}}/orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["customers", "{{customerId}}", "orders"]
+        }
+      }
+    },
+    {
+      "name": "11 - Reject customer deletion with existing orders (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 409 Conflict', () => pm.response.to.have.status(409));",
+              "const body = pm.response.json();",
+              "pm.test('Error code is customer_has_orders', () => pm.expect(body.code).to.eql('customer_has_orders'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{baseUrl}}/customers/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["customers", "{{customerId}}"] }
+      }
+    },
+    {
+      "name": "12 - Cleanup: delete order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{baseUrl}}/orders/{{orderId}}", "host": ["{{baseUrl}}"], "path": ["orders", "{{orderId}}"] }
+      }
+    },
+    {
+      "name": "13 - Cleanup: delete customer (now allowed)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 204 No Content', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{baseUrl}}/customers/{{customerId}}", "host": ["{{baseUrl}}"], "path": ["customers", "{{customerId}}"] }
+      }
+    }
+  ]
+}
