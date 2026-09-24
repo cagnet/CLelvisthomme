@@ -1,0 +1,110 @@
+<div class="container mx-auto p-5">
+    <a routerLink="/customers" class="link link-hover text-sm">&larr; Back to customers</a>
+
+    @if(loading()){
+    <div class="pt-5">
+        <span class="loading loading-spinner loading-lg" aria-label="Loading customer"></span>
+    </div>
+    }@else {@if(error()){
+    <div role="alert" class="alert alert-error mt-5">
+        <span>{{error()}}</span>
+    </div>
+    }@else {@if(customer(); as customer){
+    <div class="card bg-base-100 shadow-md mt-5">
+        <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h1 class="card-title text-2xl">
+                    {{customer.name}} {{customer.firstName}}
+                    @if(customer.isActive){
+                    <span class="badge badge-success">Active</span>
+                    }@else {
+                    <span class="badge badge-neutral">Inactive</span>
+                    }
+                </h1>
+                <div class="flex gap-2">
+                    <a [routerLink]="['/customers', customer.id, 'edit']" class="btn btn-sm">Edit</a>
+                    <button type="button" class="btn btn-sm btn-error" (click)="deleteCustomer(customer)">Delete</button>
+                </div>
+            </div>
+            <dl class="grid grid-cols-1 sm:grid-cols-[8rem_1fr] gap-1">
+                <dt class="font-medium">Email</dt>
+                <dd>{{customer.email || '-'}}</dd>
+                <dt class="font-medium">Address</dt>
+                <dd>{{customer.address || '-'}}</dd>
+            </dl>
+            @if(deleteError()){
+            <div role="alert" class="alert alert-error">
+                <span>{{deleteError()}}</span>
+            </div>
+            }
+        </div>
+    </div>
+
+    <h2 class="text-xl font-bold pt-8 pb-3">Orders</h2>
+
+    @if(!customer.isActive){
+    <div role="alert" class="alert alert-warning mb-3">
+        <span>This customer is inactive: the API will refuse new orders.</span>
+    </div>
+    }
+
+    <form [formGroup]="orderForm" (ngSubmit)="saveOrder()" class="flex flex-wrap items-start gap-2 pb-5">
+        <div class="flex flex-col gap-1">
+            <label for="amount" class="text-sm font-medium">
+                {{editingOrderId() == null ? 'New order amount' : 'Amount of order #' + editingOrderId()}}
+            </label>
+            <input id="amount" type="number" step="0.01" formControlName="amount" class="input"
+                [class.input-error]="orderFieldErrors()['amount']" />
+            @for (message of orderFieldErrors()['amount']; track message) {
+            <p class="text-sm text-error">{{message}}</p>
+            }
+        </div>
+        <div class="flex gap-2 pt-6">
+            <button type="submit" class="btn btn-primary" [disabled]="savingOrder()">
+                {{editingOrderId() == null ? 'Add order' : 'Save'}}
+            </button>
+            @if(editingOrderId() != null){
+            <button type="button" class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
+            }
+        </div>
+    </form>
+
+    @if(orderError()){
+    <div role="alert" class="alert alert-error mb-3">
+        <span>{{orderError()}}</span>
+    </div>
+    }
+
+    <div class="overflow-x-auto">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th class="text-right">Amount</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (order of orders(); track order.id) {
+                <tr [class.bg-base-200]="editingOrderId() == order.id">
+                    <td>{{order.id}}</td>
+                    <td>{{order.createdAt | date: 'medium'}}</td>
+                    <td class="text-right">{{order.amount | currency: 'EUR'}}</td>
+                    <td class="flex justify-end gap-2">
+                        <button type="button" class="btn btn-sm" (click)="editOrder(order)">Edit</button>
+                        <button type="button" class="btn btn-sm btn-error" (click)="deleteOrder(order)">Delete</button>
+                    </td>
+                </tr>
+                }@empty {
+                <tr>
+                    <td colspan="4">
+                        <div class="badge badge-primary badge-lg">No order yet</div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }}}
+</div>
