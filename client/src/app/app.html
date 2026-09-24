@@ -1,1 +1,8 @@
-<router-outlet></router-outlet>
+<nav class="navbar bg-base-200 px-5 gap-2">
+  <a routerLink="/customers" class="text-lg font-bold mr-auto">Customer Orders</a>
+  <a routerLink="/customers" routerLinkActive="btn-active" class="btn btn-ghost btn-sm">Customers</a>
+  <a routerLink="/dashboard" routerLinkActive="btn-active" class="btn btn-ghost btn-sm">Dashboard</a>
+</nav>
+<main>
+  <router-outlet></router-outlet>
+</main>

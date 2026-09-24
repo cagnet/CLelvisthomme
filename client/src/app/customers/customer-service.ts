@@ -17,7 +17,7 @@ export class CustomerService {
 
     getCustomers(): void {
         this.loading.set(true);
-        this.httpClient.get<Customer[]>(CUSTOMER_URL).subscribe(
+        this.getAll().subscribe(
             {
                 next: (value) => {
                     this.customers.set(value);
@@ -30,6 +30,10 @@ export class CustomerService {
                 }
             }
         )
+    }
+
+    getAll(): Observable<Customer[]> {
+        return this.httpClient.get<Customer[]>(CUSTOMER_URL);
     }
 
     getById(id: number): Observable<Customer> {
