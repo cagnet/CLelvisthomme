@@ -8,9 +8,9 @@ public sealed class CustomerRepository(InMemoryDatabase database) : ICustomerRep
 {
     public IReadOnlyCollection<Customer> GetAll() => database.Customers.Values.OrderBy(x => x.Id).ToArray();
     public Customer? GetById(int id) => database.Customers.GetValueOrDefault(id);
-    public Customer Add(string name, bool isActive)
+    public Customer Add(string name, string firstName, string email, string address, bool isActive)
     {
-        var customer = new Customer(database.NextCustomerId(), name, isActive);
+        var customer = new Customer(database.NextCustomerId(), name, firstName, email, address, isActive);
         database.Customers[customer.Id] = customer;
         return customer;
     }
