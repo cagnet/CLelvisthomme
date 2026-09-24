@@ -2,9 +2,9 @@ CREATE TABLE Customer
 (
     Id          int IDENTITY PRIMARY KEY,
     Name        nvarchar(100) NOT NULL,
-    FirstName   nvarchar(100) NOT NULL,
-    Email       nvarchar(254) NOT NULL,
-    Address     nvarchar(254) NOT NULL,
+    FirstName   nvarchar(100),
+    Email       nvarchar(254),
+    Address     nvarchar(254),
     IsActive    bit NOT NULL
 );
 
