@@ -13,26 +13,6 @@ public sealed class OrdersController(OrderService service) : ControllerBase
     [HttpGet("{id:int}")]
     public ActionResult<Order> ReadOne(int id) => service.ReadOne(id) is { } order ? Ok(order) : NotFound();
 
-    [HttpPost("/customers/{customerId:int}/orders")]
-    public ActionResult<Order> Create(int customerId, CreateOrder request)
-    {
-        if (request.Amount <= 0)
-        {
-            ModelState.AddModelError(nameof(request.Amount), "Amount must be greater than zero.");
-            return ValidationProblem(ModelState);
-        }
-
-        try
-        {
-            var order = service.Create(customerId, request.Amount);
-            return order is null ? NotFound() : CreatedAtAction(nameof(ReadOne), new { id = order.Id }, order);
-        }
-        catch (BusinessRuleException exception)
-        {
-            return Conflict(new Problem(exception.Code, exception.Message));
-        }
-    }
-
     [HttpPatch("{id:int}")]
     public ActionResult<Order> Update(int id, UpdateOrder request)
     {
