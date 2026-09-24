@@ -12,6 +12,21 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Running against the API
+
+The API has no CORS policy, so in development the Angular dev server proxies `/api/*` to `http://localhost:5156` (see `proxy.conf.json`, the prefix is removed before forwarding).
+
+```bash
+# from the repository root
+dotnet run --project src/CustomerOrders.Api
+
+# in client/
+pnpm install
+pnpm start
+```
+
+The API URL is set in `src/environments/environment.development.ts` (`/api`, proxied) and `src/environments/environment.ts` (production build).
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
