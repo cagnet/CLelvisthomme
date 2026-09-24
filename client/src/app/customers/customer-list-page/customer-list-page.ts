@@ -19,6 +19,28 @@ export class CustomerListPage implements OnInit {
 
   deleteError = signal<string | null>(null)
 
+  search = signal('')
+  statusFilter = signal<'all' | 'active' | 'inactive'>('all')
+
+  filteredCustomers = computed(() => {
+    const query = this.search().trim().toLowerCase()
+    const status = this.statusFilter()
+    return this.customers().filter((customer) =>
+      `${customer.name} ${customer.firstName ?? ''}`.toLowerCase().includes(query)
+      && (status == 'all' || customer.isActive == (status == 'active'))
+    )
+  })
+
+  updateSearch(event: Event): void {
+    const value = (event.target as HTMLInputElement).value
+    this.search.set(value)
+  }
+
+  updateStatusFilter(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value
+    this.statusFilter.set(value == 'active' || value == 'inactive' ? value : 'all')
+  }
+
   ngOnInit(): void {
     this.customerService.getCustomers()
   }

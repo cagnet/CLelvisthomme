@@ -4,6 +4,18 @@
         <a routerLink="/customers/new" class="btn btn-primary">New customer</a>
     </div>
 
+    <div class="flex flex-wrap gap-3 pb-5">
+        <label for="search" class="sr-only">Search by name</label>
+        <input id="search" type="search" placeholder="Search by name" class="input w-full sm:max-w-xs"
+            [value]="search()" (input)="updateSearch($event)" />
+        <label for="status" class="sr-only">Filter by status</label>
+        <select id="status" class="select w-full sm:max-w-44" (change)="updateStatusFilter($event)">
+            <option value="all" [selected]="statusFilter() == 'all'">All statuses</option>
+            <option value="active" [selected]="statusFilter() == 'active'">Active</option>
+            <option value="inactive" [selected]="statusFilter() == 'inactive'">Inactive</option>
+        </select>
+    </div>
+
     @if(deleteError()){
     <div role="alert" class="alert alert-error mb-5">
         <span>{{deleteError()}}</span>
@@ -28,7 +40,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (customer of customers(); track customer.id) {
+                @for (customer of filteredCustomers(); track customer.id) {
                 <tr>
                     <td>
                         <a [routerLink]="['/customers', customer.id]" class="link link-hover font-medium">
@@ -54,7 +66,9 @@
                 }@empty {
                 <tr>
                     <td colspan="3">
-                        <div class="badge badge-primary badge-lg">No customer yet</div>
+                        <div class="badge badge-primary badge-lg">
+                            {{customers().length == 0 ? 'No customer yet' : 'No customer matches your search'}}
+                        </div>
                     </td>
                 </tr>
                 }
