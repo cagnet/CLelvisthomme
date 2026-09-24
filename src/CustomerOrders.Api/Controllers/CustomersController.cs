@@ -45,7 +45,7 @@ public sealed class CustomersController(CustomerService service, OrderService or
             ModelState.AddModelError(nameof(request.Name), "Name is required.");
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-        var customer = service.Create(request.Name, request.IsActive);
+        var customer = service.Create(request.Name, request.FirstName, request.Email, request.Address, request.IsActive);
         return CreatedAtAction(nameof(ReadOne), new { id = customer.Id }, customer);
     }
 
@@ -58,7 +58,7 @@ public sealed class CustomersController(CustomerService service, OrderService or
             return ValidationProblem(ModelState);
         }
 
-        var customer = service.Update(id, request.Name, request.IsActive);
+        var customer = service.Update(id, request.Name, request.FirstName, request.Email, request.Address, request.IsActive);
         return customer is null ? NotFound() : Ok(customer);
     }
 

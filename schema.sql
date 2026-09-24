@@ -1,8 +1,11 @@
 CREATE TABLE Customer
 (
-    Id       int IDENTITY PRIMARY KEY,
-    Name     nvarchar(100) NOT NULL,
-    IsActive bit NOT NULL
+    Id          int IDENTITY PRIMARY KEY,
+    Name        nvarchar(100) NOT NULL,
+    FirstName   nvarchar(100) NOT NULL,
+    Email       nvarchar(254) NOT NULL,
+    Address     nvarchar(254) NOT NULL,
+    IsActive    bit NOT NULL
 );
 
 CREATE TABLE [Order]
