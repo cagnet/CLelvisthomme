@@ -1,0 +1,69 @@
+<div class="container mx-auto p-5 max-w-xl">
+    <h1 class="text-2xl font-bold pb-5">{{isEdit() ? 'Edit customer' : 'New customer'}}</h1>
+
+    @if(loading()){
+    <span class="loading loading-spinner loading-lg" aria-label="Loading customer"></span>
+    }@else {
+    @if(error()){
+    <div role="alert" class="alert alert-error mb-5">
+        <span>{{error()}}</span>
+    </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1">
+            <label for="name" class="text-sm font-medium">Name *</label>
+            <input id="name" type="text" formControlName="name" class="input w-full"
+                [class.input-error]="isFieldInvalid('name')" />
+            @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+            <p class="text-sm text-error">Name is required</p>
+            }
+            @for (message of fieldErrors('name'); track message) {
+            <p class="text-sm text-error">{{message}}</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="firstName" class="text-sm font-medium">First name</label>
+            <input id="firstName" type="text" formControlName="firstName" class="input w-full"
+                [class.input-error]="isFieldInvalid('firstName')" />
+            @for (message of fieldErrors('firstName'); track message) {
+            <p class="text-sm text-error">{{message}}</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="email" class="text-sm font-medium">Email</label>
+            <input id="email" type="email" formControlName="email" class="input w-full"
+                [class.input-error]="isFieldInvalid('email')" />
+            @for (message of fieldErrors('email'); track message) {
+            <p class="text-sm text-error">{{message}}</p>
+            }
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="address" class="text-sm font-medium">Address</label>
+            <input id="address" type="text" formControlName="address" class="input w-full"
+                [class.input-error]="isFieldInvalid('address')" />
+            @for (message of fieldErrors('address'); track message) {
+            <p class="text-sm text-error">{{message}}</p>
+            }
+        </div>
+
+        <label for="isActive" class="flex items-center gap-2">
+            <input id="isActive" type="checkbox" formControlName="isActive" class="checkbox" />
+            <span class="text-sm font-medium">Active</span>
+        </label>
+
+        <div class="flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
+                @if(saving()){
+                <span class="loading loading-spinner loading-sm"></span>
+                }
+                Save
+            </button>
+            <a [routerLink]="isEdit() ? ['/customers', id()] : ['/customers']" class="btn btn-ghost">Cancel</a>
+        </div>
+    </form>
+    }
+</div>
